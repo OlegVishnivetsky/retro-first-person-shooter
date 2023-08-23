@@ -5,19 +5,30 @@ public class InputManager : MonoBehaviour
 {
     private PlayerInput playerInput;
 
+    public event Action OnJumpStarted;
+
     private void Awake()
     {
-        playerInput = new PlayerInput();       
+        playerInput = new PlayerInput();
     }
 
     private void OnEnable()
     {
         playerInput.Enable();
+
+        playerInput.Player.Jump.started += Jump_started;
     }
 
     private void OnDisable()
     {
         playerInput.Disable();
+
+        playerInput.Player.Jump.started -= Jump_started;
+    }
+
+    private void Jump_started(UnityEngine.InputSystem.InputAction.CallbackContext context)
+    {
+        OnJumpStarted?.Invoke();
     }
 
     public Vector2 GetMovementInput()

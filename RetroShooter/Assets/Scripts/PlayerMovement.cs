@@ -1,6 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
     [Header("COMPONENTS")]
@@ -11,55 +11,84 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float runningSpeed;
 
     [Header("JUMP PARAMETERS")]
-    [SerializeField] private float jumpForce;
+    [SerializeField] private float jumpHeight;
+    [SerializeField] private bool autoJump;
+
+    [Header("GROUND CHECK PARAMETERS")]
+    [SerializeField] private Transform groundCheckOriginTransform;
+    [SerializeField] private float groundCheckDistance;
+    [SerializeField] private LayerMask groundLayer;
+
+    private new Rigidbody rigidbody;
+
+    private bool isJumpButtonPressed;
+    private bool isGrounded;
 
     private float currentSpeed;
-    private float gravityValue;
 
-    private CharacterController controller;
-    private Vector3 playerVelocity;
-
-    private bool groundedPlayer;
+    private Vector3 movement;
 
     private void Awake()
     {
-        gravityValue = Physics.gravity.y;
-        controller = GetComponent<CharacterController>();
+        rigidbody = GetComponent<Rigidbody>();
+    }
+
+    private void OnEnable()
+    {
+        inputManager.OnJumpStarted += InputManager_OnJumpStarted;
+    }
+
+    private void OnDisable()
+    {
+        inputManager.OnJumpStarted -= InputManager_OnJumpStarted;
     }
 
     void Update()
     {
+        isGrounded = IsPlayerGrounded();
+
         CalculateCurrentSpeed();
-        HandlePlayerGravity();
+        HandlePlayerInput();
+    }
+
+
+    private void FixedUpdate()
+    {
         HandlePlayerMovement();
+        HandlePlayerJump();
+    }
+
+    private void InputManager_OnJumpStarted()
+    {
+        if (!autoJump)
+        {
+            isJumpButtonPressed = true;
+        }
+    }
+
+    private void HandlePlayerInput()
+    {
+        if (autoJump)
+        {
+            isJumpButtonPressed = inputManager.IsJumpButtonPressed();
+        }
+
+        movement = transform.forward * inputManager.GetMovementInput().y + 
+            transform.right * inputManager.GetMovementInput().x;        
     }
 
     private void HandlePlayerMovement()
-    {    
-        Vector3 movement = transform.forward * inputManager.GetMovementInput().y + 
-            transform.right * inputManager.GetMovementInput().x;
-
-        controller.Move(movement * Time.deltaTime * currentSpeed);
-    }
-
-    private void HandlePlayerGravity()
     {
-        playerVelocity.y += gravityValue * Time.deltaTime;
-        controller.Move(playerVelocity * Time.deltaTime);
-
-        HandlePlayerJump();
-
-        if (controller.isGrounded && playerVelocity.y < 0f)
-        {
-            playerVelocity.y = 0.5f;
-        }
+        rigidbody.MovePosition(rigidbody.position + movement * currentSpeed * Time.fixedDeltaTime);
     }
 
     private void HandlePlayerJump()
     {
-        if (inputManager.IsJumpButtonPressed() && controller.isGrounded)
+        if (isGrounded && isJumpButtonPressed)
         {
-            playerVelocity.y += Mathf.Sqrt(jumpForce * Mathf.Abs(gravityValue));
+            isJumpButtonPressed = false;
+            rigidbody.AddForce(Vector3.up * jumpHeight, 
+                ForceMode.VelocityChange);
         }
     }
 
@@ -73,5 +102,19 @@ public class PlayerMovement : MonoBehaviour
         {
             currentSpeed = walkSpeed;
         }
+    }
+
+    private bool IsPlayerGrounded()
+    {
+        return Physics.Raycast(groundCheckOriginTransform.position,
+                    -Vector3.up, groundCheckDistance, groundLayer);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        Ray ray = new Ray(groundCheckOriginTransform.position, -Vector3.up);
+
+        Gizmos.color = Color.green;
+        Gizmos.DrawRay(ray.origin, ray.direction.normalized * groundCheckDistance + ray.origin);
     }
 }
