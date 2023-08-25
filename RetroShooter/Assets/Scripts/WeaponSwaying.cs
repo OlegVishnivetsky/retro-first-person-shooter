@@ -3,7 +3,6 @@ using UnityEngine;
 public class WeaponSwaying : MonoBehaviour
 {
     [Header("MAIN COMPONENTS")]
-    [SerializeField] private InputManager inputManager;
     [SerializeField] private Transform weaponHolderTransform;
 
     [Header("SWAY PARAMETERS")]
@@ -17,7 +16,7 @@ public class WeaponSwaying : MonoBehaviour
 
     private void SwayWeapon()
     {
-        Vector2 mouseDelta = inputManager.GetMouseDelta() * swayMultiplier;
+        Vector2 mouseDelta = InputManager.Instance.GetMouseDelta() * swayMultiplier;
 
         Quaternion yRotation = Quaternion.AngleAxis(-mouseDelta.y, Vector3.right);
         Quaternion xRotation = Quaternion.AngleAxis(mouseDelta.x, Vector3.up);

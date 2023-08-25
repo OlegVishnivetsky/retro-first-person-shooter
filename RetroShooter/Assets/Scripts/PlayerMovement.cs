@@ -3,9 +3,6 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody))]
 public class PlayerMovement : MonoBehaviour
 {
-    [Header("COMPONENTS")]
-    [SerializeField] private InputManager inputManager;
-
     [Header("MOVEMENT PARAMETERS")]
     [SerializeField] private float walkSpeed;
     [SerializeField] private float runningSpeed;
@@ -35,12 +32,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnEnable()
     {
-        inputManager.OnJumpStarted += InputManager_OnJumpStarted;
+        InputManager.Instance.OnJumpStarted += InputManager_OnJumpStarted;
     }
 
     private void OnDisable()
     {
-        inputManager.OnJumpStarted -= InputManager_OnJumpStarted;
+        InputManager.Instance.OnJumpStarted -= InputManager_OnJumpStarted;
     }
 
     void Update()
@@ -70,11 +67,11 @@ public class PlayerMovement : MonoBehaviour
     {
         if (autoJump)
         {
-            isJumpButtonPressed = inputManager.IsJumpButtonPressed();
+            isJumpButtonPressed = InputManager.Instance.IsJumpButtonPressed();
         }
 
-        movement = transform.forward * inputManager.GetMovementInput().y + 
-            transform.right * inputManager.GetMovementInput().x;        
+        movement = transform.forward * InputManager.Instance.GetMovementInput().y + 
+            transform.right * InputManager.Instance.GetMovementInput().x;        
     }
 
     private void HandlePlayerMovement()
@@ -94,7 +91,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void CalculateCurrentSpeed()
     {
-        if (inputManager.IsRunningButtonPressed())
+        if (InputManager.Instance.IsRunningButtonPressed())
         {
             currentSpeed = runningSpeed;
         }

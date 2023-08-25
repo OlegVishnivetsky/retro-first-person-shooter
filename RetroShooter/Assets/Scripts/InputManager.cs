@@ -1,14 +1,15 @@
 using System;
 using UnityEngine;
 
-public class InputManager : MonoBehaviour
+public class InputManager : SingletonMonobehaviour<InputManager>
 {
     private PlayerInput playerInput;
 
     public event Action OnJumpStarted;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         playerInput = new PlayerInput();
     }
 
@@ -49,5 +50,10 @@ public class InputManager : MonoBehaviour
     public bool IsJumpButtonPressed()
     {
         return playerInput.Player.Jump.inProgress;
+    }
+
+    public bool IsFireButtonPressed()
+    {
+        return playerInput.Player.Fire.inProgress;
     }
 }

@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class PlayerLook : MonoBehaviour
 {
-    [Header("COMPONENTS")]
-    [SerializeField] private InputManager inputManager;
-
     [Header("MAIN PARAMETERS")]
     [SerializeField] private float verticalSensetivity = 60f;
     [SerializeField] private float horizontalSensetivity = 60f;
@@ -33,7 +30,7 @@ public class PlayerLook : MonoBehaviour
 
     private void LookRotation()
     {
-        Vector2 mouseDelta = inputManager.GetMouseDelta();
+        Vector2 mouseDelta = InputManager.Instance.GetMouseDelta();
 
         transform.Rotate(Vector3.up * mouseDelta.x * horizontalSensetivity * Time.deltaTime);
 
